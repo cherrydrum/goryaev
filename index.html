@@ -164,7 +164,7 @@
         U.text = trimmed
         const voice = voices[document.getElementById('select').value]
         U.voice = voice
-        U.lang = voices[0].lang
+        U.lang = voices[document.getElementById('select').value].lang
         U.volume = 1
         U.rate = 1
         U.pitch = 1
@@ -175,7 +175,7 @@
         if (debounce) {return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal == true && e.results[i][0].confidence > 0.7) {
+            if (e.results[i].isFinal == true) {
                 result = editFinal(editInterim(e.results[i][0].transcript))
                 if (!result) {
                     return
