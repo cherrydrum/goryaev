@@ -172,7 +172,7 @@
     }
 
     recognition.onresult = (e) => {
-        if (debounce) {return}
+        if (debounce) {console.log('debounced'); return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
             if (e.results[i].isFinal == true) {
