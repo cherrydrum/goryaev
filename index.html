@@ -175,7 +175,7 @@
         if (debounce) {return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal == true && e.results[i][0].confidence > 0.7) {
+            if (e.results[i].isFinal == true) {
                 console.log(e.results[i][0].transcript)
                 result = editFinal(editInterim(e.results[i][0].transcript))
                 if (!result) {
