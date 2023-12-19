@@ -90,7 +90,7 @@
     var recognizing = false
 
     const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new speechRecognition()
+    const recognition = new speechRecognition();
 
     recognition.continuous = true
     recognition.lang = 'en-US'
