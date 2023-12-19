@@ -154,11 +154,9 @@
     }
 
     var debounce = false
-    var handle = setTimeout(() => {debounce = false}, 2000)
     function convertTextToSpeech(payload) {
         debounce = true
-        window.clearTimeout(handle);
-        handle = setTimeout(() => {debounce = false}, 2000)
+        setTimeout(() => {debounce = false}, 1500)
         const trimmed = String(payload).trim()
         if (!trimmed) return
         U.text = trimmed
