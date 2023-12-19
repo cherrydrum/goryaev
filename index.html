@@ -92,7 +92,7 @@
     const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new speechRecognition()
 
-    recognition.continuous = false
+    recognition.continuous = true
     recognition.lang = 'en-US'
 
     recognition.onstart = () => {
@@ -125,7 +125,6 @@
 
     function populateVoices(voices) {
         voices.forEach((voice, index) => {
-            let select = document.getElementById("select")
             select.options[index] = new Option(voice.name, index)
         })
         initializeHandlers()
