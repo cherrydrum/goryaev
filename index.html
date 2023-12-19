@@ -93,6 +93,8 @@
     const recognition = new speechRecognition();
 
     recognition.continuous = true
+    recognition.interimResults = true
+    recognition.maxAlternatives = 1
     recognition.lang = 'en-US'
 
     recognition.onstart = () => {
@@ -133,8 +135,8 @@
 
     function initializeHandlers() {
         // Ниже перечислены почти все события, которые возникают при работе с рассматриваемым интерфейсом
-        U.onstart = () => console.log('Started')
-        U.onend = () => console.log('Finished')
+        U.onstart = () => {console.log('Started'); debounce = true}
+        U.onend = () => {console.log('Finished'); debounce = false}
         U.onerror = (err) => console.error(err)
         
         // Обработка изменения настроек
@@ -156,7 +158,6 @@
     var debounce = false
     function convertTextToSpeech(payload) {
         debounce = true
-        setTimeout(() => {debounce = false}, 1500)
         const trimmed = String(payload).trim()
         if (!trimmed) return
         U.text = trimmed
@@ -173,7 +174,7 @@
         if (debounce) {console.log('debounced'); return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal == true) {
+            if (!debounce) {
                 console.log(e.results[i][0].transcript)
                 result = editFinal(editInterim(e.results[i][0].transcript))
                 if (!result) {
