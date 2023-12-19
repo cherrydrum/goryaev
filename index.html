@@ -181,7 +181,7 @@
                     result = editFinal(editInterim(e.results[i][0].transcript))}
                 }
                 if (!result) {
-                    result = String(e.results[i][0].transcript).trim()
+                    result = editInterim(String(e.results[i][0].transcript).trim())
                 }
                 console.log(result)
                 if (state == 'idle' && result == 'старт') {
