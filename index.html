@@ -56,17 +56,17 @@
     }
 
     const DICTIONARY = {
-        one: '1',
-        two: '2',
-        three: '3',
-        four: '4',
-        five: '5',
-        six: '6',
-        seven: '7',
-        eight: '8',
-        nine: '9',
-        ten: '10',
-        'for': '4'
+        // one: '1',
+        // two: '2',
+        // three: '3',
+        // four: '4',
+        // five: '5',
+        // six: '6',
+        // seven: '7',
+        // eight: '8',
+        // nine: '9',
+        // ten: '10',
+        // 'for': '4'
     }
 
     function editInterim(s) {
@@ -164,7 +164,7 @@
         U.text = trimmed
         const voice = voices[document.getElementById('select').value]
         U.voice = voice
-        U.lang = voices[document.getElementById('select').value].lang
+        U.lang = voice.lang
         U.volume = 1
         U.rate = 1
         U.pitch = 1
@@ -175,7 +175,7 @@
         if (debounce) {return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal == true) {
+            if (e.results[i].isFinal == true && e.results[i][0].confidence > 0.7) {
                 result = editFinal(editInterim(e.results[i][0].transcript))
                 if (!result) {
                     return
