@@ -169,12 +169,13 @@
         U.pitch = 1
         speechSynthesis.speak(U)
     }
-
+    var test = ''
     recognition.onresult = (e) => {
         console.log('got sound')
         if (debounce) {console.log('debounced'); return}
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
+            test = e.results
             if (!debounce) {
                 console.log(e.results[i][0].transcript)
                 result = editFinal(editInterim(e.results[i][0].transcript))
