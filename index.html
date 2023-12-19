@@ -161,7 +161,7 @@
         const trimmed = String(payload).trim()
         if (!trimmed) return
         U.text = trimmed
-        const voice = voices[select.value]
+        const voice = voices[document.getElementById('select').value]
         U.voice = voice
         U.lang = voices[0].lang
         U.volume = 1
