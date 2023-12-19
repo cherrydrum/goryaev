@@ -56,17 +56,17 @@
     }
 
     const DICTIONARY = {
-        // one: '1',
-        // two: '2',
-        // three: '3',
-        // four: '4',
-        // five: '5',
-        // six: '6',
-        // seven: '7',
-        // eight: '8',
-        // nine: '9',
-        // ten: '10',
-        // 'for': '4'
+        one: '1',
+        two: '2',
+        three: '3',
+        four: '4',
+        five: '5',
+        six: '6',
+        seven: '7',
+        eight: '8',
+        nine: '9',
+        ten: '10',
+        'for': '4'
     }
 
     function editInterim(s) {
@@ -176,6 +176,7 @@
         var result = ''
         for (let i = e.resultIndex; i < e.results.length; i++) {
             if (e.results[i].isFinal == true && e.results[i][0].confidence > 0.7) {
+                console.log(e.results[i][0].transcript)
                 result = editFinal(editInterim(e.results[i][0].transcript))
                 if (!result) {
                     return
