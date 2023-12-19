@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="styles.css">
+    <title>Goryaev</title>
+</head>
+
+<script>
+
+    var dilution = 0
+    var squares_amount = 10
+    var suv = 1
+    var countarray = 0
+    var counter = 0
+    var state = 'idle'
+    var voiceenabled = false
+
+    const average = list => list.reduce((prev, curr) => prev + curr) / list.length;
+    function initialize() {
+        counter = 0
+        suv = document.getElementById("suv").valueAsNumber;
+        dilution = document.getElementById("dilution").valueAsNumber;
+        squares_amount = document.getElementById("squarestocount").valueAsNumber;
+        countarray = Array(squares_amount).fill(0);
+    }
+
+    function updateCounter(silent = false) {
+        document.getElementById("indicator").innerText = "Current - " + (counter + 1)
+        document.getElementById("countedcells").value = countarray[counter]
+        if (voiceenabled && !silent) {
+            convertTextToSpeech('Unit ' + (counter + 1))
+        }
+    }
+
+    function nextSquare() {
+        if ((counter + 2) > countarray.length) { counter = 0 } else { counter += 1 }
+        document.getElementById("countedcells").focus()
+    }
+
+    function changeValue() {
+        countarray[counter] = document.getElementById("countedcells").valueAsNumber;
+    }
+
+    function calculate() {
+        result = Math.round(average(countarray) / suv * (dilution + 1))
+        document.getElementById("result").innerText = "Calculated cell count is " + result + " * 10^5 cells/ml"
+    }
+
+    function search(ele) {
+        if (event.key === 'Enter') {
+            changeValue();
+            nextSquare();
+        }
+    }
+
+    const DICTIONARY = {
+        one: '1',
+        two: '2',
+        three: '3',
+        four: '4',
+        five: '5',
+        six: '6',
+        seven: '7',
+        eight: '8',
+        nine: '9',
+        ten: '10',
+        'for': '4'
+    }
+
+    function editInterim(s) {
+        return s
+            .split(' ')
+            .map((word) => {
+                word = word.trim()
+                return DICTIONARY[word.toLowerCase()] ? DICTIONARY[word.toLowerCase()] : word
+            })
+            .join(' ')
+    }
+
+    function editFinal(s) {
+        return s.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim().toLowerCase()
+    }
+
+    const U = new SpeechSynthesisUtterance()
+    var voices = speechSynthesis.getVoices()
+
+    var final_transcript = ''
+    var recognizing = false
+
+    const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new speechRecognition()
+
+    recognition.continuous = false
+    recognition.lang = 'en-US'
+
+    recognition.onstart = () => {
+        console.log('Распознавание голоса запущено')
+    }
+    recognition.onerror = ({ error }) => {
+        console.error(error)
+    }
+    recognition.onend = () => {
+        console.log('Распознавание голоса закончено')
+    }
+
+    function runTTS() {
+        if (!voiceenabled) {
+        voiceenabled = true
+        document.getElementById('TTStoggle').innerText = "Disable VA"
+        recognition.start()
+        } else {
+            recognition.stop()
+            speechSynthesis.cancel()
+            voiceenabled = false
+            document.getElementById('TTStoggle').innerText = "Enable VA"
+        }
+    }
+
+    speechSynthesis.onvoiceschanged = () => {
+        voices = speechSynthesis.getVoices()
+        populateVoices(voices)
+    }
+
+    function populateVoices(voices) {
+        voices.forEach((voice, index) => {
+            let select = document.getElementById("select")
+            select.options[index] = new Option(voice.name, index)
+        })
+        initializeHandlers()
+    }
+
+    function initializeHandlers() {
+        // Ниже перечислены почти все события, которые возникают при работе с рассматриваемым интерфейсом
+        U.onstart = () => console.log('Started')
+        U.onend = () => console.log('Finished')
+        U.onerror = (err) => console.error(err)
+        
+        // Обработка изменения настроек
+        // wrapper.onchange = ({ target }) => {
+        //     if (target.type !== 'range') return
+        //     handleChange(target) }
+    }
+        // case 'cancel':
+        //     return speechSynthesis.cancel()
+        // case 'pause':
+        //     return speechSynthesis.pause()
+        // case 'resume':
+        //     return speechSynthesis.resume()
+
+    function handleChange(el) {
+        el.nextElementSibling.textContent = el.value
+    }
+
+    var debounce = false
+    var handle = setTimeout(() => {debounce = false}, 2000)
+    function convertTextToSpeech(payload) {
+        debounce = true
+        window.clearTimeout(handle);
+        handle = setTimeout(() => {debounce = false}, 2000)
+        const trimmed = String(payload).trim()
+        if (!trimmed) return
+        U.text = trimmed
+        const voice = voices[select.value]
+        U.voice = voice
+        U.lang = voices[0].lang
+        U.volume = 1
+        U.rate = 1
+        U.pitch = 1
+        speechSynthesis.speak(U)
+    }
+
+    recognition.onresult = (e) => {
+        if (debounce) {return}
+        var result = ''
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal == true && e.results[i][0].confidence > 0.7) {
+                result = editFinal(editInterim(e.results[i][0].transcript))
+                if (!result) {
+                    return
+                }
+                console.log(result)
+                if (state == 'idle' && result == 'start') {
+                    convertTextToSpeech('Started.')
+                    initialize();
+                    updateCounter();
+                    state = 'counting'
+                } else if (state == 'counting') {
+                    query = result.split(" ");
+                    num = parseInt(result)
+                    switch (query[0]) {
+                        case 'restart':
+                            
+                            convertTextToSpeech('Restarted unit ' + (counter + 1))
+                            countarray[counter] = 0
+                            break;
+                        case 'next':
+                            nextSquare();
+                            updateCounter();
+                            break;
+                        case 'finish':
+                            convertTextToSpeech('Finished.')
+                            calculate();
+                            state = 'idle'
+                            break;
+                        case 'count':
+                            convertTextToSpeech('It is ' + countarray[counter] + ' cells in unit ' + (counter+1))
+                        default:
+                            if (num) {
+                            countarray[counter] += num
+                            convertTextToSpeech('Plus ' + num)
+                            updateCounter(silent=true);
+                            }
+                        }
+                }
+            }
+        }
+    }
+
+
+
+
+</script>
+
+<body>
+    <center>
+    <h3>Barret v 1.0</h3>
+    
+    <label>Voice:
+        <select id="select"></select>
+    </label>
+
+    <button onclick="runTTS();" id="TTStoggle">Enable VA</button>
+
+
+    <label>Dilution: 1 to </label>
+    <input type="number" id="dilution" value="1">
+    <br>
+    <label>Total squares to count</label>
+    <input type="number" id="squarestocount" value="10">
+    <br>
+    <label>Single unit volume (* 10^5 ml)</label>
+    <input type="number" id="suv" value="1.6">
+    <br>
+    <button onclick="initialize();">Start</button>
+
+
+    <h3 id="indicator">Current cell - None</h3>
+
+    <button>Previous</button>
+    <input type="number" id="countedcells" onchange="changeValue();" onkeydown="search(this)">
+    <button onclick="nextSquare();">Next</button>
+    <br>
+    <br>
+    <button onclick="calculate();">Finish</button>
+
+    <p id="result"></p>
+</body>
+
+</html>
