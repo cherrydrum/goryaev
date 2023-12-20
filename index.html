@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css">
     <title>Goryaev</title>
@@ -27,7 +28,7 @@
     }
 
     function updateCounter(silent = false) {
-        document.getElementById("indicator").innerText = "Current - " + (counter + 1)
+        document.getElementById("indicator").innerText = "UNIT NO - " + (counter + 1)
         document.getElementById("countedcells").value = countarray[counter]
         if (voiceenabled && !silent) {
             convertTextToSpeech('Unit ' + (counter + 1))
@@ -36,7 +37,6 @@
 
     function nextSquare() {
         if ((counter + 2) > countarray.length) { counter = 0 } else { counter += 1 }
-        document.getElementById("countedcells").focus()
     }
 
     function changeValue() {
@@ -44,8 +44,14 @@
     }
 
     function calculate() {
-        result = Math.round(average(countarray) / suv * (dilution + 1))
-        document.getElementById("result").innerText = "Calculated cell count is " + result + " * 10^5 cells/ml"
+        power = 5
+        result = average(countarray) / suv * (dilution + 1)
+        while (Math.floor(result / 10) > 0) {
+            result = result / 10
+            power += 1
+        }
+        document.getElementById("res").innerText = result
+        document.getElementById("power").innerText = power
     }
 
     function search(ele) {
@@ -104,7 +110,9 @@
     }
     recognition.onend = () => {
         console.log('Распознавание голоса закончено');
+        if (voiceenabled) {
         recognition.start();
+        }
     }
 
     function runTTS() {
@@ -194,9 +202,9 @@
                     num = parseInt(result)
                     switch (query[0]) {
                         case 'заново':
-                            
                             convertTextToSpeech('Restarted unit ' + (counter + 1))
                             countarray[counter] = 0
+                            updateCounter(silent=true);
                             break;
                         case 'дальше':
                             nextSquare();
@@ -228,37 +236,20 @@
 
 <body>
     <center>
-    <h3>Barret v 1.0</h3>
-    
-    <label>Voice:
-        <select id="select"></select>
-    </label>
-
-    <button onclick="runTTS();" id="TTStoggle">Enable VA</button>
-
-
-    <label>Dilution: 1 to </label>
-    <input type="number" id="dilution" value="1">
     <br>
-    <label>Total squares to count</label>
-    <input type="number" id="squarestocount" value="10">
-    <br>
-    <label>Single unit volume (* 10^5 ml)</label>
-    <input type="number" id="suv" value="1.6">
-    <br>
-    <button onclick="initialize();">Start</button>
+    <table cellpadding="5px" width="90%">
+        <tr align="left"><td width="60%"><select id="select"></select></td><td class="srow" width="40%"><button onclick="runTTS();" id="TTStoggle">Enable VA</button></td></tr>
+        <tr align="left"><td width="60%">Dilution </td><td class="srow" width="40%">1 to <input type="number" id="dilution" value="1"></td></tr>
+        <tr align="left"><td width="60%">Squares to count</td><td class="srow" width="40%"><input type="number" id="squarestocount" value="10"></td></tr>
+        <tr align="left"><td width="60%">Unit volume • 10<sup>5</sup> ml</td><td class="srow" width="40%"><input type="number" id="suv" value="1.6"></td></tr>
 
-
-    <h3 id="indicator">Current cell - None</h3>
-
-    <button>Previous</button>
-    <input type="number" id="countedcells" onchange="changeValue();" onkeydown="search(this)">
-    <button onclick="nextSquare();">Next</button>
+    </table>
     <br>
-    <br>
-    <button onclick="calculate();">Finish</button>
+    <h3 id="indicator" class="unit">UNIT NO - NONE</h3>
 
-    <p id="result"></p>
+    <input type="number" class="counter" id="countedcells" onchange="changeValue();">
+    <br>
+    <p id="result" class="result">Calculated cell count <br> is <span id="res"></span> • 10<sup><span id="power"></span></sup> cells/ml</p>
 </body>
 
 </html>
