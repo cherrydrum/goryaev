@@ -6,255 +6,113 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="styles.css">
     <title>Goryaev</title>
+
+    <script src="audioeng/howler.js"></script>
+    <script>
+
+        document.addEventListener("DOMContentLoaded", () => {
+        const indicator = document.getElementById('indicator'); 
+        const resultline = document.getElementById('result')});
+
+        
+
+        var sound = new Howl({
+        src: ['audioeng/plop.ogg'],
+        preload: true,
+        html5: false,
+        });
+        Howler.autoUnlock = false;
+        
+        function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+        } else if (document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+        }
+
+        function cellplus(count) {
+            sound.play();
+            window.navigator.vibrate(80)
+            cells += 1
+            indicator.innerText = cells
+            for (let i = 0; i < count-1; i++) {
+  
+                setTimeout(() => {cells += 1;
+                indicator.innerText = cells; sound.play()
+                }, 100);
+            }
+            
+            
+        }
+
+
+        var cells = 0
+        var suvc = 0
+        var dilc = 0
+        var stcc = 0
+
+        function initialize () {
+            cells = 0
+            indicator.innerText = cells
+            suvc = document.getElementById("suv").valueAsNumber
+            dilc = document.getElementById("dil").valueAsNumber
+            stcc = document.getElementById("stc").valueAsNumber
+            document.getElementById('result').style.visibility = 'hidden'
+            indicator.style.visibility = 'visible' 
+        }
+
+        function calculate () {
+            power = 5
+            result = (cells / stcc) / suvc * (dilc + 1)
+            while (Math.floor(result / 10) > 0) {
+                result = result / 10
+                power += 1
+                if (power == 6) {
+                    break
+                }
+            }
+            document.getElementById("res").innerText = Math.round(result * 100) / 100
+            document.getElementById("power").innerText = power
+            document.getElementById('result').style.visibility = 'visible'
+            indicator.style.visibility = 'hidden' 
+        }
+
+
+    </script>
+
 </head>
 
-<script>
-
-    var dilution = 0
-    var squares_amount = 10
-    var suv = 1
-    var countarray = 0
-    var counter = 0
-    var state = 'idle'
-    var voiceenabled = false
-
-    const average = list => list.reduce((prev, curr) => prev + curr) / list.length;
-    function initialize() {
-        counter = 0
-        suv = document.getElementById("suv").valueAsNumber;
-        dilution = document.getElementById("dilution").valueAsNumber;
-        squares_amount = document.getElementById("squarestocount").valueAsNumber;
-        countarray = Array(squares_amount).fill(0);
-        document.getElementById("res").innerText = ""
-        document.getElementById("power").innerText = ""
-    }
-
-    function updateCounter(silent = false) {
-        document.getElementById("indicator").innerText = "UNIT NO - " + (counter + 1)
-        document.getElementById("countedcells").value = countarray[counter]
-        if (voiceenabled && !silent) {
-            convertTextToSpeech('Unit ' + (counter + 1))
-        }
-    }
-
-    function nextSquare() {
-        if ((counter + 2) > countarray.length) { counter = 0 } else { counter += 1 }
-    }
-
-    function changeValue() {
-        countarray[counter] = document.getElementById("countedcells").valueAsNumber;
-    }
-
-    function calculate() {
-        power = 5
-        result = average(countarray) / suv * (dilution + 1)
-        while (Math.floor(result / 10) > 0) {
-            result = result / 10
-            power += 1
-            if (power == 6) {
-                break
-            }
-        }
-        document.getElementById("res").innerText = Math.round(result * 100) / 100
-        document.getElementById("power").innerText = power
-    }
-
-    function search(ele) {
-        if (event.key === 'Enter') {
-            changeValue();
-            nextSquare();
-        }
-    }
-
-    const DICTIONARY = {
-        один: '1',
-        два: '2',
-        три: '3',
-        четыре: '4',
-        пять: '5',
-        шесть: '6',
-        семь: '7',
-        восемь: '8',
-        девять: '9',
-        десять: '10',
-    }
-
-    function editInterim(s) {
-        return s
-            .split(' ')
-            .map((word) => {
-                word = word.trim()
-                return DICTIONARY[word.toLowerCase()] ? DICTIONARY[word.toLowerCase()] : word
-            })
-            .join(' ')
-    }
-
-    function editFinal(s) {
-        return s.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"").trim().toLowerCase()
-    }
-
-    const U = new SpeechSynthesisUtterance()
-    var voices = speechSynthesis.getVoices()
-
-    var final_transcript = ''
-    var recognizing = false
-
-    const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new speechRecognition();
-
-    recognition.continuous = true
-    recognition.interimResults = true
-    recognition.maxAlternatives = 1
-    recognition.lang = 'ru-RU'
-
-    recognition.onstart = () => {
-        console.log('Распознавание голоса запущено')
-    }
-    recognition.onerror = ({ error }) => {
-        console.error(error)
-    }
-    recognition.onend = () => {
-        console.log('Распознавание голоса закончено');
-        if (voiceenabled) {
-        recognition.start();
-        }
-    }
-
-    function runTTS() {
-        if (!voiceenabled) {
-        voiceenabled = true
-        document.getElementById('TTStoggle').innerText = "Disable VA"
-        recognition.start()
-        } else {
-            recognition.stop()
-            speechSynthesis.cancel()
-            voiceenabled = false
-            document.getElementById('TTStoggle').innerText = "Enable VA"
-        }
-    }
-
-    speechSynthesis.onvoiceschanged = () => {
-        voices = speechSynthesis.getVoices()
-        populateVoices(voices)
-    }
-
-    function populateVoices(voices) {
-        voices.forEach((voice, index) => {
-            select.options[index] = new Option(voice.name, index)
-        })
-        initializeHandlers()
-    }
-
-    function initializeHandlers() {
-        // Ниже перечислены почти все события, которые возникают при работе с рассматриваемым интерфейсом
-        U.onstart = () => {console.log('Started'); debounce = true}
-        U.onend = () => {console.log('Finished'); debounce = false}
-        U.onerror = (err) => console.error(err)
-        
-        // Обработка изменения настроек
-        // wrapper.onchange = ({ target }) => {
-        //     if (target.type !== 'range') return
-        //     handleChange(target) }
-    }
-        // case 'cancel':
-        //     return speechSynthesis.cancel()
-        // case 'pause':
-        //     return speechSynthesis.pause()
-        // case 'resume':
-        //     return speechSynthesis.resume()
-
-    function handleChange(el) {
-        el.nextElementSibling.textContent = el.value
-    }
-
-    var debounce = false
-    function convertTextToSpeech(payload) {
-        debounce = true
-        const trimmed = String(payload).trim()
-        if (!trimmed) return
-        U.text = trimmed
-        const voice = voices[document.getElementById('select').value]
-        U.voice = voice
-        U.lang = voice.lang
-        U.volume = 1
-        U.rate = 1
-        U.pitch = 1
-        speechSynthesis.speak(U)
-    }
-    var test = ''
-    recognition.onresult = (e) => {
-        if (debounce) {console.log('debounced'); return}
-        var result = ''
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-            console.log(e.results)
-            if (!debounce) {
-                console.log(e.results[i][0].transcript)
-                for (let j = 0; j < e.results[i].length; j++ ) {
-                    if (parseInt(e.results[i][j].transcript)) {
-                    result = editFinal(editInterim(e.results[i][0].transcript))}
-                }
-                if (!result) {
-                    result = editInterim(String(e.results[i][0].transcript).trim())
-                }
-                console.log(result)
-                if (state == 'idle' && result == 'старт') {
-                    convertTextToSpeech('Started.')
-                    initialize();
-                    updateCounter();
-                    state = 'counting'
-                } else if (state == 'counting') {
-                    query = result.split(" ");
-                    num = parseInt(result)
-                    switch (query[0]) {
-                        case 'заново':
-                            convertTextToSpeech('Restarted unit ' + (counter + 1))
-                            countarray[counter] = 0
-                            updateCounter(silent=true);
-                            break;
-                        case 'дальше':
-                            nextSquare();
-                            updateCounter();
-                            break;
-                        case 'конец':
-                            convertTextToSpeech('Finished.')
-                            calculate();
-                            state = 'idle'
-                            break;
-                        case 'проверка':
-                            convertTextToSpeech('It is ' + countarray[counter] + ' cells in unit ' + (counter+1))
-                        default:
-                            if (num) {
-                            countarray[counter] += num
-                            convertTextToSpeech('Plus ' + num)
-                            updateCounter(silent=true);
-                            }
-                        }
-                }
-            } else {console.log('debounced by if')}
-        }
-    }
-
-
-
-
-</script>
-
 <body>
-    <center>
-    <br>
-    <table cellpadding="5px" width="90%">
-        <tr align="left"><td width="60%"><select id="select"></select></td><td class="srow" width="40%"><button onclick="runTTS();" id="TTStoggle">Enable VA</button></td></tr>
-        <tr align="left"><td width="60%">Dilution </td><td class="srow" width="40%">1 to <input type="number" id="dilution" value="1"></td></tr>
-        <tr align="left"><td width="60%">Squares to count</td><td class="srow" width="40%"><input type="number" id="squarestocount" value="10"></td></tr>
-        <tr align="left"><td width="60%">Unit volume • 10<sup>5</sup> ml</td><td class="srow" width="40%"><input type="number" id="suv" value="1.6"></td></tr>
 
-    </table>
-    <br>
-    <h3 id="indicator" class="unit">UNIT NO - NONE</h3>
+    <div class="btn-container" style="display: flex;">
+        <button onclick="cellplus(1);" id="b1" class="countbtn" style="background: linear-gradient(#72aadf, #6184a5);"></button>
+        <span id="indicator" class="unit" style="margin-left: 20%; visibility:hidden;"><b>0</b></span>
+    </div>
 
-    <input type="number" class="counter" id="countedcells" onchange="changeValue();">
-    <br>
-    <p id="result" class="result">Calculated cell count <br> is <span id="res"></span> • 10<sup><span id="power"></span></sup> cells/ml</p>
+    <div class="btn-container" >
+        <button onclick="cellplus(2);" id="b2" class="countbtn" style="margin-left: 30%; background: linear-gradient(#f3b24f, #f38b4f);"></button>
+    </div>
+
+    <div class="btn-container" style="padding: 10px; margin-top: 5vh; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
+        <button onclick="calculate();">Finish</button>
+        <button onclick="initialize();">Start</button>
+        <button onclick="toggleFullScreen();">Fullscreen</button>
+    </div>
+
+    <div class="btn-container" style="padding: 10px; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
+        <p id="result" class="result" style="visibility:hidden;"><span id="res"></span> • 10<sup><span id="power"></span></sup> cells/ml</p>
+    </div>
+    <div class="btn-container" style="padding: 10px; height: 5vh; display: flex; align-items: center; text-align: center;" >
+        <p>Set the dilution (1 : X), amount of units to count and sigle unit volume (• 10<sup>5</sup>)</p>
+    </div>
+
+    <div class="btn-container" style="height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
+        <input type="number" id="dil" value="1">
+        <input type="number" id="stc" value="10">
+        <input type="number" id="suv" value="1.6">
+    </div>
+    
 </body>
 
 </html>
