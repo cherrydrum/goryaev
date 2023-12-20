@@ -65,6 +65,16 @@ button {
     
 }
 
+.green {
+    border: 2px rgb(125, 177, 66);
+    background-color: rgb(128, 185, 74);
+}
+
+.orange {
+    border: 2px rgb(177, 120, 66);
+    background-color: rgb(196, 150, 64);
+}
+
 .countbtn:active {
     box-shadow: inset 0px 0px 30px rgb(68, 68, 68, 0.4);
     transition: 0.1s;
