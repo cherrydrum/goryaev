@@ -25,6 +25,8 @@
         dilution = document.getElementById("dilution").valueAsNumber;
         squares_amount = document.getElementById("squarestocount").valueAsNumber;
         countarray = Array(squares_amount).fill(0);
+        document.getElementById("res").innerText = ""
+        document.getElementById("power").innerText = ""
     }
 
     function updateCounter(silent = false) {
@@ -50,7 +52,7 @@
             result = result / 10
             power += 1
         }
-        document.getElementById("res").innerText = result
+        document.getElementById("res").innerText = Math.round(result * 100) / 100
         document.getElementById("power").innerText = power
     }
 
@@ -71,7 +73,7 @@
         семь: '7',
         восемь: '8',
         девять: '9',
-        финиш: '10',
+        десять: '10',
     }
 
     function editInterim(s) {
