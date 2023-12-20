@@ -51,6 +51,9 @@
         while (Math.floor(result / 10) > 0) {
             result = result / 10
             power += 1
+            if (power == 6) {
+                break
+            }
         }
         document.getElementById("res").innerText = Math.round(result * 100) / 100
         document.getElementById("power").innerText = power
