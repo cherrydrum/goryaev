@@ -37,50 +37,78 @@
         function cellplus(count) {
             sound.play();
             if (canVibrate) window.navigator.vibrate(80);
-            cells += 1
-            indicator.innerText = cells
-            for (let i = 0; i < count-1; i++) {
-  
-                setTimeout(() => {cells += 1;
-                indicator.innerText = cells; sound.play()
-                }, 100);
-            }
-            
-            
+            cells += count
+            indicator.innerText = cells + " / " + deadcells;                
         }
 
+        function deadcellplus(count) {
+            sound.play();
+            if (canVibrate) window.navigator.vibrate(80);
+            deadcells += count
+            indicator.innerText = cells + " / " + deadcells;                
+        }
 
         var cells = 0
+        var deadcells = 0
         var suvc = 0
         var dilc = 0
         var stcc = 0
+        var survival = 0
 
         function initialize () {
             cells = 0
-            indicator.innerText = cells
+            deadcells = 0
+            indicator.innerText = cells + " / " + deadcells
             suvc = document.getElementById("suv").valueAsNumber
             dilc = document.getElementById("dil").valueAsNumber
             stcc = document.getElementById("stc").valueAsNumber
             document.getElementById('result').style.visibility = 'hidden'
-            indicator.style.visibility = 'visible' 
+            indicator.style.visibility = 'visible'
+            document.getElementById('scounter').style.visibility = 'visible'
         }
 
         function calculate () {
             power = 5
-            result = (cells / stcc) / suvc * (dilc + 1)
-            while (Math.floor(result / 10) > 0) {
-                result = result / 10
+            aliveresult = (cells / stcc) / suvc * (dilc + 1)
+            deadresult = (deadcells / stcc) / suvc * (dilc + 1)
+            survival = 100 * aliveresult / (aliveresult + deadresult) 
+            while (Math.floor(aliveresult / 10) > 0) {
+                aliveresult = aliveresult / 10
                 power += 1
                 if (power == 6) {
                     break
                 }
             }
-            document.getElementById("res").innerText = Math.round(result * 100) / 100
+            document.getElementById("res").innerText = Math.round(aliveresult * 100) / 100
             document.getElementById("power").innerText = power
+            document.getElementById("surv").innerText = Math.round(survival * 100) / 100
             document.getElementById('result').style.visibility = 'visible'
-            indicator.style.visibility = 'hidden' 
+            document.getElementById('scounter').style.visibility = 'hidden'
+            indicator.style.visibility = 'hidden'
         }
 
+        function copyResult () {
+            var currentdate = new Date(); 
+            var tocopy = "Замер от " + currentdate.getDate() + "/"
+                + (currentdate.getMonth()+1)  + "/" 
+                + currentdate.getFullYear() + " "  
+                + currentdate.getHours() + ":"  
+                + currentdate.getMinutes() + "\n" + (Math.round(aliveresult * 100) / 100) + "*10^" + power + " кл/мл (" + survival + "% жсп)";
+
+
+            navigator.clipboard.writeText(tocopy);
+            alert('Скопировано:\n' + tocopy);
+        }
+
+        var curSquare = 1
+        function nextSquare () {
+            if (curSquare + 1 > stcc) {
+                curSquare = 1
+            } else {
+                curSquare += 1
+            }
+            document.getElementById("squarecount").innerText = "Квадрат " + curSquare
+        }
 
     </script>
 
@@ -90,32 +118,32 @@
 
     <div class="btn-container" style="display: flex;">
         <button onclick="cellplus(1);" id="b1" class="countbtn" style="background: linear-gradient(#72aadf, #6184a5);"></button>
-        <span id="indicator" class="unit" style="margin-left: 20%; visibility:hidden;"><b>0</b></span>
+        <span id="indicator" class="unit" style="margin-left: 20%; margin-right: 2%; visibility:hidden;"><b>0</b></span>
     </div>
-
+    
     <div class="btn-container" >
-        <button onclick="cellplus(2);" id="b2" class="countbtn" style="margin-left: 30%; background: linear-gradient(#f3b24f, #f38b4f);"></button>
+        <button onclick="deadcellplus(1);" id="b2" class="countbtn" style="margin-left: 30%; background: linear-gradient(#f3b24f, #f38b4f);"></button>
+    </div>
+    <center id="scounter" style="margin-top: 10%; visibility: hidden;"><span id="squarecount" style="font-size: 2 em; font-weight: bold;">Квадрат 1</span> <button onclick="nextSquare();" style="margin-left: 5%;">Дальше</button></center>
+    <div class="btn-container" style="margin-bottom: 0%; padding: 10px; margin-top: 5vh; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
+        <button class="orange" onclick="calculate();">Подсчёт</button>
+        <button class="green" onclick="initialize();">Начать</button>
+        <button onclick="toggleFullScreen();">Полноэкр.</button>
     </div>
 
-    <div class="btn-container" style="padding: 10px; margin-top: 5vh; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
-        <button class="orange" onclick="calculate();">Finish</button>
-        <button class="green" onclick="initialize();">Start</button>
-        <button onclick="toggleFullScreen();">Fullscreen</button>
+    <div class="btn-container" style="margin-top: 0%; margin-bottom: 15%; padding: 10px; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
+        <p id="result" class="result" style="visibility:hidden;" onclick="copyResult();"><span id="res"></span> • 10<sup><span id="power"></span></sup> кл/мл (<span id="surv"></span>% жс-ть)</p>
     </div>
-
-    <div class="btn-container" style="padding: 10px; height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
-        <p id="result" class="result" style="visibility:hidden;"><span id="res"></span> • 10<sup><span id="power"></span></sup> cells/ml</p>
+    <div class="btn-container" style="padding: 10px; height: 5vh; display: flex; align-items: center; text-align: justify;" >
+        <p>Задайте разведение (1 : X), количество квадратов и объем одного квадрата&nbsp;(•&nbsp;10<sup>5</sup>).<br><br>Нажми по результату чтобы быстро скопировать его в буфер обмена.</p>
     </div>
-    <div class="btn-container" style="padding: 10px; height: 5vh; display: flex; align-items: center; text-align: center;" >
-        <p>Set the dilution (1 : X), amount of units to count and sigle unit volume (• 10<sup>5</sup>)</p>
-    </div>
-
+    <br>
+    <br>
     <div class="btn-container" style="height: 5vh; display: flex; align-items: center; justify-content: space-evenly;" >
         <input type="number" id="dil" value="1">
         <input type="number" id="stc" value="10">
         <input type="number" id="suv" value="1.6">
     </div>
-    
 </body>
 
 </html>

@@ -66,12 +66,12 @@ button {
 }
 
 .green {
-    border: 2px rgb(125, 177, 66);
+    border: rgb(101, 143, 53);
     background-color: rgb(128, 185, 74);
 }
 
 .orange {
-    border: 2px rgb(177, 120, 66);
+    border: 2px rgb(133, 89, 49);
     background-color: rgb(196, 150, 64);
 }
 
@@ -89,7 +89,7 @@ button {
 }
 
 .unit {
-    font-size: 3em;
+    font-size: 2em;
 }
 
 .result {
