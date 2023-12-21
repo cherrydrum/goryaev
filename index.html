@@ -13,7 +13,6 @@
         document.addEventListener("DOMContentLoaded", () => {
         const indicator = document.getElementById('indicator'); 
         const resultline = document.getElementById('result');
-        const canVibrate = window.navigator.vibrate;
     });
         
         
@@ -35,7 +34,7 @@
 
         function cellplus(count) {
             sound.play();
-            if (canVibrate) window.navigator.vibrate(80);
+            if (window.navigator.vibrate) window.navigator.vibrate(80);
             cells += 1
             indicator.innerText = cells
             for (let i = 0; i < count-1; i++) {
