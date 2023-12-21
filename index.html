@@ -16,7 +16,8 @@
     });
         
         
-
+        var canVibrate = false;
+        if(window.navigator.vibrate) canVibrate = true;
         var sound = new Howl({
         src: ['plop.ogg'],
         preload: true,
