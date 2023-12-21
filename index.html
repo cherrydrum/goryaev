@@ -93,11 +93,16 @@
                 + (currentdate.getMonth()+1)  + "/" 
                 + currentdate.getFullYear() + " "  
                 + currentdate.getHours() + ":"  
-                + currentdate.getMinutes() + "\n" + (Math.round(aliveresult * 100) / 100) + "*10^" + power + " кл/мл (" + survival + "% жсп)";
+                + currentdate.getMinutes() + "\n" + (Math.round(aliveresult * 100) / 100) + "*10^" + power + " кл/мл (" + (Math.round(survival * 100) / 100) + "% жсп)";
 
 
-            navigator.clipboard.writeText(tocopy);
-            alert('Скопировано:\n' + tocopy);
+            navigator.clipboard.writeText(tocopy).then(() => {
+                alert('Скопировано:\n' + tocopy);;
+            })
+            .catch(() => {
+                alert('Скопировать не получилось. Печально');
+            });;
+            
         }
 
         var curSquare = 1
