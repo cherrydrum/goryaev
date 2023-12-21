@@ -112,11 +112,7 @@
             } else {
                 curSquare += 1
             }
-            if (canVibrate) window.navigator.vibrate(200);
-            sound.play();
-            setTimeout(() => {sound.play();}, 100);
-            setTimeout(() => {sound.play();}, 200)
-            setTimeout(() => {sound.play();}, 300)
+            if (canVibrate) window.navigator.vibrate(500);
             document.getElementById("squarecount").innerText = "Квадрат " + curSquare
         }
 
