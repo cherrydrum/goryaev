@@ -18,6 +18,7 @@
         
         var canVibrate = false;
         if(window.navigator.vibrate) canVibrate = true;
+
         var sound = new Howl({
         src: ['plop.ogg'],
         preload: true,
@@ -35,7 +36,7 @@
 
         function cellplus(count) {
             sound.play();
-            if (window.navigator.vibrate) window.navigator.vibrate(80);
+            if (canVibrate) window.navigator.vibrate(80);
             cells += 1
             indicator.innerText = cells
             for (let i = 0; i < count-1; i++) {
